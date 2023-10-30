@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract Counter {
-    uint256 public number;
+import {ERC1155} from "solmate/tokens/ERC1155.sol";
 
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
-    }
+contract Counter is ERC1155 {
+    constructor() ERC1155() {}
 
-    function increment() public {
-        number++;
+    function uri(uint256 id) public view override returns (string memory) {
+        return "";
     }
 }
