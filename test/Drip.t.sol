@@ -27,4 +27,8 @@ contract DripTest is Test, ERC1155TokenReceiver {
     function testFailMintInsufficientFunds() public {
         drip.mint{value: 0.05 ether}(1, 1);
     }
+
+    function testFailExceedsTotalSupply() public {
+        drip.mint{value: 0.1 ether}(1, 2);
+    }
 }
