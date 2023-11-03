@@ -3,8 +3,9 @@ pragma solidity ^0.8.13;
 
 import {ERC1155} from "solmate/tokens/ERC1155.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Drip is ERC1155 {
+contract Drip is ERC1155, Ownable {
     using Strings for uint256;
 
     mapping(uint256 => uint256) public idToPrice;
@@ -14,7 +15,7 @@ contract Drip is ERC1155 {
 
     uint256 spacing = 1 days;
 
-    string public baseURI = "https://www.0xhoneyjar.xyz/merch/";
+    string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
 
     constructor() ERC1155() {
         // Bucket hats 0.08
@@ -122,5 +123,9 @@ contract Drip is ERC1155 {
 
         idToCurrentSupply[id] += quantity;
         _mint(msg.sender, id, quantity, "");
+    }
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 }
