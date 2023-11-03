@@ -115,7 +115,6 @@ contract Drip is ERC1155 {
 
     function mint(uint256 id, uint256 quantity) public payable {
         require(idToPrice[id] > 0, "Invalid ID");
-        require(id <= 13, "Invalid ID");
         require(block.timestamp >= idToOpeningTime[id], "Not yet open for minting");
         require(quantity > 0, "Invalid quantity");
         require(msg.value == idToPrice[id] * quantity, "Incorrect Ether value");

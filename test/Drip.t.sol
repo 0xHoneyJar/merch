@@ -13,22 +13,37 @@ contract DripTest is Test, ERC1155TokenReceiver {
     }
 
     function testMint() public {
-        drip.mint{value: 0.1 ether}(1, 1);
-        assertEq(drip.balanceOf(address(this), 1), 1);
+        vm.warp(1672444800 + 2 days);
 
-        drip.mint{value: 0.05 ether}(2, 1);
-        assertEq(drip.balanceOf(address(this), 2), 1);
+        drip.mint{value: 0.08 ether}(73, 1);
+        assertEq(drip.balanceOf(address(this), 73), 1);
+
+        drip.mint{value: 0.09 ether}(76, 1);
+        assertEq(drip.balanceOf(address(this), 76), 1);
     }
 
-    function testFailMintOutOfBounds() public {
-        drip.mint{value: 0.1 ether}(3, 1);
+    function testFailMintOutOfBoundsAbove() public {
+        vm.warp(1672444800 + 2 days);
+        drip.mint{value: 0.1 ether}(100, 1);
+    }
+
+    function testFailMintOutOfBoundsBelow() public {
+        vm.warp(1672444800 + 2 days);
+        drip.mint{value: 0.1 ether}(1, 1);
     }
 
     function testFailMintInsufficientFunds() public {
-        drip.mint{value: 0.05 ether}(1, 1);
+        vm.warp(1672444800 + 2 days);
+        drip.mint{value: 0.08 ether}(76, 1);
     }
 
-    function testFailExceedsTotalSupply() public {
-        drip.mint{value: 0.1 ether}(1, 2);
+    function testFailOverpay() public {
+        vm.warp(1672444800 + 2 days);
+        drip.mint{value: 10 ether}(73, 2);
+    }
+
+    function testFailExceedsSupply() public {
+        vm.warp(1672444800 + 2 days);
+        drip.mint{value: 1.92 ether}(73, 24);
     }
 }
