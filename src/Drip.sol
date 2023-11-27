@@ -17,6 +17,11 @@ contract Drip is ERC1155, Ownable {
 
     string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
 
+    error InvalidID();
+    error MintNotOpen();
+    error InsufficientFunds();
+    error ExceedsMaxSupply();
+
     constructor() ERC1155() Ownable(msg.sender) {
         // Bucket hats 0.08
         idToPrice[73] = 0.08 ether;
@@ -113,11 +118,6 @@ contract Drip is ERC1155, Ownable {
     function uri(uint256 id) public view override returns (string memory) {
         return string(abi.encodePacked(baseURI, id.toString()));
     }
-
-    error InvalidID();
-    error MintNotOpen();
-    error InsufficientFunds();
-    error ExceedsMaxSupply();
 
     function mint(uint256 id, uint256 quantity) public payable {
         if (idToPrice[id] <= 0) revert InvalidID();

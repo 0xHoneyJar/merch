@@ -56,4 +56,20 @@ contract DripTest is Test, ERC1155TokenReceiver {
         vm.expectRevert(Drip.ExceedsMaxSupply.selector);
         drip.mint{value: 1.92 ether}(73, 24);
     }
+
+    function testWithdrawFunds() public {
+        vm.warp(1672444800 + 2 days);
+
+        drip.mint{value: 0.08 ether}(73, 1);
+        assertEq(drip.balanceOf(address(this), 73), 1);
+
+        drip.mint{value: 0.09 ether}(76, 1);
+        assertEq(drip.balanceOf(address(this), 76), 1);
+
+        uint256 balance = address(this).balance;
+        drip.withdraw();
+        assertEq(address(this).balance, balance + 0.17 ether);
+    }
+
+    receive() external payable {}
 }
