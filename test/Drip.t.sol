@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test, console2} from "forge-std/Test.sol";
+import "forge-std/Test.sol";
 import {Drip} from "../src/Drip.sol";
 import {ERC1155TokenReceiver} from "solmate/tokens/ERC1155.sol";
 
@@ -22,28 +22,38 @@ contract DripTest is Test, ERC1155TokenReceiver {
         assertEq(drip.balanceOf(address(this), 76), 1);
     }
 
-    function testFailMintOutOfBoundsAbove() public {
+    function testMintOutOfBoundsAboveRevert() public {
         vm.warp(1672444800 + 2 days);
+
+        vm.expectRevert(Drip.InvalidID.selector);
         drip.mint{value: 0.1 ether}(100, 1);
     }
 
-    function testFailMintOutOfBoundsBelow() public {
+    function testMintOutOfBoundsBelowRevert() public {
         vm.warp(1672444800 + 2 days);
+
+        vm.expectRevert(Drip.InvalidID.selector);
         drip.mint{value: 0.1 ether}(1, 1);
     }
 
-    function testFailMintInsufficientFunds() public {
+    function testMintInsufficientFundsRevert() public {
         vm.warp(1672444800 + 2 days);
+
+        vm.expectRevert(Drip.InsufficientFunds.selector);
         drip.mint{value: 0.08 ether}(76, 1);
     }
 
-    function testFailOverpay() public {
+    function testOverpayRevert() public {
         vm.warp(1672444800 + 2 days);
+
+        vm.expectRevert(Drip.InsufficientFunds.selector);
         drip.mint{value: 10 ether}(73, 2);
     }
 
-    function testFailExceedsSupply() public {
+    function testExceedsSupplyRevert() public {
         vm.warp(1672444800 + 2 days);
+
+        vm.expectRevert(Drip.ExceedsMaxSupply.selector);
         drip.mint{value: 1.92 ether}(73, 24);
     }
 }
