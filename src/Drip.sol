@@ -6,6 +6,11 @@ import { Ownable } from "solady/src/auth/Ownable.sol";
 import { LibString } from "solady/src/utils/LibString.sol";
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
+
+interface ERC721 {
+    function balanceOf(address owner) external view returns (uint256 balance);
+}
+
 contract Drip is ERC1155, Ownable {
     error InvalidID();
     error MintNotOpen();
@@ -20,9 +25,8 @@ contract Drip is ERC1155, Ownable {
     }
 
     mapping(uint256 => Item) public idToItem;
-
-    uint256 constant spacing = 1 days;
-
+    uint256 constant MAX_DISCOUNT = 20;
+    ERC721 constant honeycombs = ERC721(0xCB0477d1Af5b8b05795D89D59F4667b59eAE9244);
     string constant public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
 
     constructor() ERC1155() {
@@ -40,8 +44,15 @@ contract Drip is ERC1155, Ownable {
         if (msg.value != item.price * quantity) revert InsufficientFunds();
         if (item.currentSupply + quantity > item.maxSupply) revert ExceedsMaxSupply();
 
+        uint256 honeycombsBalance = honeycombs.balanceOf(msg.sender);
+        // cap discount at 20%
+        // 1 honeycomb = 1% discount
+        uint256 discount = honeycombsBalance > MAX_DISCOUNT ? MAX_DISCOUNT : honeycombsBalance;
+        uint256 toRefund = honeycombsBalance > 0 ? (item.price * quantity * discount) / 100 : 0;
+
         idToItem[id].currentSupply += quantity;
         _mint(msg.sender, id, uint256(quantity), "");
+        SafeTransferLib.safeTransferETH(msg.sender, toRefund);
     }
 
     function withdraw() public onlyOwner {
