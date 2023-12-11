@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ERC1155} from "solmate/tokens/ERC1155.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import { ERC1155 } from "solmate/tokens/ERC1155.sol";
+import { Ownable } from "solady/src/auth/Ownable.sol";
+import { LibString } from "solady/src/utils/LibString.sol";
+import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
 contract Drip is ERC1155, Ownable {
-    using Strings for uint256;
-
     error InvalidID();
     error MintNotOpen();
     error InsufficientFunds();
@@ -26,10 +25,12 @@ contract Drip is ERC1155, Ownable {
 
     string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
 
-    constructor() ERC1155() Ownable(msg.sender) {}
+    constructor() ERC1155() {
+        _initializeOwner(msg.sender);
+    }
 
     function uri(uint256 id) public view override returns (string memory) {
-        return string(abi.encodePacked(baseURI, id.toString()));
+        return LibString.concat(baseURI, LibString.toString(id));
     }
 
     function mint(uint256 id, uint32 quantity) public payable {
@@ -44,7 +45,7 @@ contract Drip is ERC1155, Ownable {
     }
 
     function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        SafeTransferLib.safeTransferAllETH(msg.sender);
     }
 
     function setItems(
