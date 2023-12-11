@@ -8,128 +8,59 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Drip is ERC1155, Ownable {
     using Strings for uint256;
 
-    mapping(uint256 => uint256) public idToPrice;
-    mapping(uint256 => uint256) public idToMaxSupply;
-    mapping(uint256 => uint256) public idToCurrentSupply;
-    mapping(uint256 => uint256) public idToOpeningTime;
-
-    uint256 spacing = 1 days;
-
-    string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
-
     error InvalidID();
     error MintNotOpen();
     error InsufficientFunds();
     error ExceedsMaxSupply();
 
-    constructor() ERC1155() Ownable(msg.sender) {
-        // Bucket hats 0.08
-        idToPrice[73] = 0.08 ether;
-        idToPrice[74] = 0.08 ether;
-        idToPrice[75] = 0.08 ether;
-
-        idToMaxSupply[73] = 23;
-        idToMaxSupply[74] = 23;
-        idToMaxSupply[75] = 23;
-
-        // Fishing hats 0.09
-        idToPrice[76] = 0.09 ether;
-        idToPrice[77] = 0.09 ether;
-        idToPrice[78] = 0.09 ether;
-
-        idToMaxSupply[76] = 23;
-        idToMaxSupply[77] = 23;
-        idToMaxSupply[78] = 23;
-
-        // Shirts 0.1
-        idToPrice[79] = 0.1 ether;
-        idToPrice[80] = 0.1 ether;
-        idToPrice[81] = 0.1 ether;
-        idToPrice[82] = 0.1 ether;
-        idToPrice[83] = 0.1 ether;
-        idToPrice[84] = 0.1 ether;
-        idToPrice[85] = 0.1 ether;
-        idToPrice[86] = 0.1 ether;
-        idToPrice[87] = 0.1 ether;
-        idToPrice[88] = 0.1 ether;
-        idToPrice[89] = 0.1 ether;
-        idToPrice[90] = 0.1 ether;
-
-        idToMaxSupply[79] = 35;
-        idToMaxSupply[80] = 35;
-        idToMaxSupply[81] = 35;
-        idToMaxSupply[82] = 35;
-        idToMaxSupply[83] = 35;
-        idToMaxSupply[84] = 35;
-        idToMaxSupply[85] = 35;
-        idToMaxSupply[86] = 35;
-        idToMaxSupply[87] = 35;
-        idToMaxSupply[88] = 35;
-        idToMaxSupply[89] = 35;
-        idToMaxSupply[90] = 35;
-
-        // Hoodies 0.2
-        idToPrice[91] = 0.2 ether;
-        idToPrice[92] = 0.2 ether;
-        idToPrice[93] = 0.2 ether;
-        idToPrice[94] = 0.2 ether;
-
-        idToMaxSupply[91] = 17;
-        idToMaxSupply[92] = 17;
-        idToMaxSupply[93] = 18;
-        idToMaxSupply[94] = 17;
-
-        uint256 initialDropTime = 1672444800; // Example: January 1, 2023
-
-        // Bucket hats 0.08
-        idToOpeningTime[73] = initialDropTime;
-        idToOpeningTime[74] = initialDropTime;
-        idToOpeningTime[75] = initialDropTime;
-
-        // Fishing hats 0.09 (after Bucket hats)
-        initialDropTime += spacing;
-        idToOpeningTime[76] = initialDropTime;
-        idToOpeningTime[77] = initialDropTime;
-        idToOpeningTime[78] = initialDropTime;
-
-        // Shirts 0.1 (after Fishing hats)
-        initialDropTime += spacing;
-        idToOpeningTime[79] = initialDropTime;
-        idToOpeningTime[80] = initialDropTime;
-        idToOpeningTime[81] = initialDropTime;
-        idToOpeningTime[82] = initialDropTime;
-        idToOpeningTime[83] = initialDropTime;
-        idToOpeningTime[84] = initialDropTime;
-        idToOpeningTime[85] = initialDropTime;
-        idToOpeningTime[86] = initialDropTime;
-        idToOpeningTime[87] = initialDropTime;
-        idToOpeningTime[88] = initialDropTime;
-        idToOpeningTime[89] = initialDropTime;
-        idToOpeningTime[90] = initialDropTime;
-
-        // Hoodies 0.2 (after Shirts)
-        initialDropTime += spacing;
-        idToOpeningTime[91] = initialDropTime;
-        idToOpeningTime[92] = initialDropTime;
-        idToOpeningTime[93] = initialDropTime;
-        idToOpeningTime[94] = initialDropTime;
+    struct Item {
+        uint128 price;
+        uint32 maxSupply;
+        uint32 currentSupply;
+        uint64 openingTime;
     }
+
+    mapping(uint256 => Item) public idToItem;
+
+    uint256 spacing = 1 days;
+
+    string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
+
+    constructor() ERC1155() Ownable(msg.sender) {}
 
     function uri(uint256 id) public view override returns (string memory) {
         return string(abi.encodePacked(baseURI, id.toString()));
     }
 
-    function mint(uint256 id, uint256 quantity) public payable {
-        if (idToPrice[id] <= 0) revert InvalidID();
-        if (block.timestamp < idToOpeningTime[id]) revert MintNotOpen();
-        if (msg.value != idToPrice[id] * quantity) revert InsufficientFunds();
-        if (idToCurrentSupply[id] + quantity > idToMaxSupply[id]) revert ExceedsMaxSupply();
+    function mint(uint256 id, uint32 quantity) public payable {
+        Item memory item = idToItem[id];
+        if (item.price == 0) revert InvalidID();
+        if (block.timestamp < item.openingTime) revert MintNotOpen();
+        if (msg.value != item.price * quantity) revert InsufficientFunds();
+        if (item.currentSupply + quantity > item.maxSupply) revert ExceedsMaxSupply();
 
-        idToCurrentSupply[id] += quantity;
-        _mint(msg.sender, id, quantity, "");
+        idToItem[id].currentSupply += quantity;
+        _mint(msg.sender, id, uint256(quantity), "");
     }
 
     function withdraw() public onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function setItems(
+        uint256 dropTime,
+        uint256[] calldata ids,
+        uint256[] calldata prices,
+        uint256[] calldata maxSupply
+    ) public onlyOwner {
+        uint256 length = ids.length;
+        for (uint256 i; i < length; i++) {
+            idToItem[ids[i]] = Item({
+                price: uint128(prices[i]),
+                maxSupply: uint32(maxSupply[i]),
+                currentSupply: 0,
+                openingTime: uint64(dropTime)
+            });
+        }
     }
 }
