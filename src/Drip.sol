@@ -6,7 +6,6 @@ import { Ownable } from "solady/src/auth/Ownable.sol";
 import { LibString } from "solady/src/utils/LibString.sol";
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
-
 interface ERC721 {
     function balanceOf(address owner) external view returns (uint256 balance);
 }

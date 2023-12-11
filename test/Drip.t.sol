@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
+import "forge-std/console2.sol";
 import {Drip} from "../src/Drip.sol";
 import {ERC1155TokenReceiver} from "solmate/tokens/ERC1155.sol";
 import {ERC721} from "solmate/tokens/ERC721.sol";
@@ -31,6 +32,7 @@ contract DripTest is Test, ERC1155TokenReceiver {
         // etch honeycomb contract on mainnet address
         honeycombs = new HoneyCombs();
         vm.etch(address(0xCB0477d1Af5b8b05795D89D59F4667b59eAE9244), address(honeycombs).code);
+        honeycombs = HoneyCombs(address(0xCB0477d1Af5b8b05795D89D59F4667b59eAE9244));
 
         drip = new Drip();
         
@@ -114,18 +116,21 @@ contract DripTest is Test, ERC1155TokenReceiver {
         drip.withdraw();
     }
 
-    // function testDiscount(uint256 combsToUse, uint256 amountToBuy) public {
-    //     uint256 combsToUse = StdUtils.bound(combsToUse, 0, 20);
-    //     uint256 amountToBuy = StdUtils.bound(amountToBuy, 0, 25);
+    function testDiscount(uint256 combsToUse, uint256 amountToBuy) public {
+        // 1 comb = 1% discount
+        uint256 combsToUse = StdUtils.bound(combsToUse, 0, 20);
+        uint256 amountToBuy = StdUtils.bound(amountToBuy, 0, 23);
 
-    //     // mint hcs for discount
-    //     honeycombs.mint(address(this), combsToUse);
-    //     uint256 balanceBefore = address(this).balance;
-    //     // mint drip
-    //     drip.mint{value: 0.08 ether * amountToBuy}(73, uint32(amountToBuy));
-    //     // balance should have diminished by (0.08 * amount) / (100 - combsToUse)
-    //     assertEq(address(this).balance, balanceBefore - ((0.08 ether * amountToBuy) / (100 - combsToUse)));
-    // }
+        // mint hcs for discount
+        honeycombs.mint(address(this), combsToUse);
+        uint256 balanceBefore = address(this).balance;
+        uint256 toPay = 0.08 ether * amountToBuy;
+        // mint drip
+        drip.mint{value: toPay}(73, uint32(amountToBuy));
+        // balance should have diminished by (0.08 * amount) / (100 - combsToUse)
+        uint256 expectedRefund = (toPay * combsToUse) / 100;
+        assertEq(address(this).balance, balanceBefore - toPay + expectedRefund);
+    }
 
     receive() external payable {}
 }
