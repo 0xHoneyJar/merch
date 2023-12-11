@@ -21,15 +21,15 @@ contract Drip is ERC1155, Ownable {
 
     mapping(uint256 => Item) public idToItem;
 
-    uint256 spacing = 1 days;
+    uint256 constant spacing = 1 days;
 
-    string public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
+    string constant public baseURI = "https://honey-interface-git-claim-0xhoneyjar-s-team.vercel.app/api/metadata_merch/";
 
     constructor() ERC1155() {
         _initializeOwner(msg.sender);
     }
 
-    function uri(uint256 id) public view override returns (string memory) {
+    function uri(uint256 id) public pure override returns (string memory) {
         return LibString.concat(baseURI, LibString.toString(id));
     }
 
