@@ -34,14 +34,16 @@ contract HenloMerch is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     /*###############################################################
                             STORAGE
     ###############################################################*/
-    mapping(uint256 id => Item) public idToItem;
-    address                     public operator;
-    address                     public treasury;
-    
+    mapping(uint256 id => Item) public      idToItem;
+    address                     public      operator;
+    address                     public      treasury;
+    IERC721                     internal    _honeycombs;
+    string                      internal    _baseTokenURI;
+
+    uint256[45] __gap;
+
     uint256     constant MAX_DISCOUNT   = 20;
     uint256     constant ID_SEPARATOR   = 100_000;
-    IERC721     constant honeycombs;
-    string      constant _baseTokenURI;
     /*###############################################################
                             CONSTRUCTOR
     ###############################################################*/
@@ -73,7 +75,7 @@ contract HenloMerch is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
         _baseTokenURI = baseURI;
     }
     function setHoneycombs(address _honeycombs) public onlyOwner {
-        honeycombs = IERC721(_honeycombs);
+        _honeycombs = IERC721(_honeycombs);
     }
     function withdraw() public onlyOwner {
         STL.safeTransferETH(owner(), address(this).balance);
@@ -120,7 +122,7 @@ contract HenloMerch is ERC721Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
         if (msg.value != item.price * quantity) revert InsufficientFunds();
         if (item.maxSupply > 0 && item.currentSupply + quantity > item.maxSupply) revert ExceedsMaxSupply();
 
-        uint256 honeycombsBalance = honeycombs.balanceOf(msg.sender);
+        uint256 honeycombsBalance = _honeycombs.balanceOf(msg.sender);
         // cap discount at 20%
         // 1 honeycomb = 1% discount
         uint256 discount = honeycombsBalance > MAX_DISCOUNT ? MAX_DISCOUNT : honeycombsBalance;
