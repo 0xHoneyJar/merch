@@ -11,6 +11,7 @@ contract DeployMerch is Script {
     address constant HONEYCOMBS = 0x886D2176D899796cD1AfFA07Eff07B9b2B80f1be;
     uint32 constant START_TIME = 1742948407;
     uint32 constant DURATION = 2 weeks;
+    uint128 constant PRICE = 0.001 ether;
 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -55,52 +56,52 @@ contract DeployMerch is Script {
 
         // White Shirt - ID: 1
         ids[0] = 1;
-        prices[0] = 1 ether;
+        prices[0] = PRICE;
         maxSupply[0] = 1000;
 
         // White Hiking Hat - ID: 2
         ids[1] = 2;
-        prices[1] = 1 ether;
+        prices[1] = PRICE;
         maxSupply[1] = 500;
 
         // Maroon Bucket Hat - ID: 3
         ids[2] = 3;
-        prices[2] = 1 ether;
+        prices[2] = PRICE;
         maxSupply[2] = 500;
 
         // Henlo Hoodie - ID: 4
         ids[3] = 4;
-        prices[3] = 1 ether;
+        prices[3] = PRICE;
         maxSupply[3] = 750;
 
         // Grey Shirt - ID: 5
         ids[4] = 5;
-        prices[4] = 1 ether;
+        prices[4] = PRICE;
         maxSupply[4] = 1000;
 
         // Grey Hiking Hat - ID: 6
         ids[5] = 6;
-        prices[5] = 1 ether;
+        prices[5] = PRICE;
         maxSupply[5] = 500;
 
         // Grey Bucket Hat - ID: 7
         ids[6] = 7;
-        prices[6] = 1 ether;
+        prices[6] = PRICE;
         maxSupply[6] = 500;
 
         // Black Shirt - ID: 8
         ids[7] = 8;
-        prices[7] = 1 ether;
+        prices[7] = PRICE;
         maxSupply[7] = 1000;
 
         // Black Hiking Hat - ID: 9
         ids[8] = 9;
-        prices[8] = 1 ether;
+        prices[8] = PRICE;
         maxSupply[8] = 500;
 
         // Black Bucket Hat - ID: 10
         ids[9] = 10;
-        prices[9] = 1 ether;
+        prices[9] = PRICE;
         maxSupply[9] = 500;
 
         // Set same start and end time for all products
