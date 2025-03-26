@@ -5,7 +5,15 @@ libs = ["lib"]
 
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
-    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "solady/=lib/solady/src/"
 ]
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[rpc_endpoints]
+bArtio = "https://bartio.rpc.berachain.com/"
+bera = "https://rpc.berachain.com/"
+
+
+[etherscan]
+bArtio = { key = "verifyContract", url = "https://api.routescan.io/v2/network/testnet/evm/80084/etherscan", chain = 80084 }
+bera = { key = "DGVIVNY6US54E8GYMBW284CI7ZDSFSC4CG", url = "https://api.berascan.com/api", chain = 80094 }
